@@ -1,7 +1,9 @@
 #DESENVOLVIMENTO RÁPIDO DE APLICAÇÕES EM PYTHON
+
 () Turma XXXX
 
 🎯 Objetivos da Disciplina
+
 ­✅ Desenvolver aplicações em Python, baseando­-se na metodologia de desenvolvimento rápido de aplicações (RAD), para realizar entregas de produtos de forma célere e coesa.
 
 ✅ Implementar técnicas manipulação de dados, com base com base nas bibliotecas da linguagem de programação Python, para obter sistemas capazes de entregar persistência de dados tratados contra erros de usuários.
