@@ -43,7 +43,7 @@ while True: #Para escutar sempre as ações do usuário!
         selected_row = str(values['tabela'][0])
         print(selected_row)
 
-    if event == 'Consultar':
+    if event == 'Consultar': #Novo método de exclusão!
         if values['tabela']==[]:
             sg.poup('Nenhuma linha foi selecionada')
         else :
@@ -52,18 +52,23 @@ while True: #Para escutar sempre as ações do usuário!
                     # INSERT
                     connection = sqlite3.connect(db_path)
                     myCursor = connection.cursor()
-                    delete_stmt = 'DELETE FROM SUPLEMENTO WHERE PRODUTO = ?'
-                    myCursor.execute(delete_stmt, (values[titulos[0]],))
+
+                    del dados[values['tabela'][0]]  #Remove a linha selecionada
+                    window['tabela'].update(values=dados)
+                    PRODUTO = values=dados
+                    print("Produto :" + PRODUTO)
+                    delete_stmt = "DELETE FROM SUPLEMENTO WHERE PRODUTO ="+PRODUTO
+                    myCursor.execute(delete_stmt)
                     # myCursor.execute("DELETE FROM SUPLEMENTO WHERE LOTE = ? ", (values[titulos[0]],))
                     
                     connection.commit()
-                    print(connection.commit())
                     connection.close()
-                    del dados[values['tabela'][0]]  #Remove a linha selecionada
-                    window['tabela'].update(values=dados)
 
                 except sqlite3.Error as e:
                     print(e)
+
+                finally:
+                    print("Registro removido!")
 
 
     if event == 'Adicionar':
