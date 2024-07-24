@@ -1,127 +1,148 @@
-import PySimpleGUI as sg # type: ignore
-
-#Inclusions
-
-import os 
-import sqlite3
-
-diretorio_corrent = os.path.dirname(os.path.abspath(__file__))
-db_path = os.path.join(diretorio_corrent, 'database.db')
-
-#A tabela será criada se ela não existir dentro do diretório.
-
-connection = sqlite3.connect(db_path)
-query = ('''CREATE TABLE IF NOT EXISTS SUPLEMENTO (LOTE CHAR(10), PRODUTO TEXT, FORNECEDOR TEXT)''')
-connection.execute(query)
-
-myCursor = connection.cursor()
+import tkinter as tk
+from tkinter import ttk
+import openpyxl
+import os
 
 
-dados = []
-myCursor.execute("select * from SUPLEMENTO")
-for i in myCursor:
-    dados.append(list(i))
+#BACKEND
+def load_data():
+    diretorio = os.path.dirname(os.path.abspath(__file__))
+    db_path = os.path.join(diretorio, 'clientes.xlsx')
+    workbook = openpyxl.load_workbook(db_path)
+    sheet = workbook.active
 
-titulos = ['Lote', 'Produto', 'Fornecedor']
+    list_values = list(sheet.values)
+    print(list_values)
 
-layout = [
-    [sg.Text(titulos[0]), sg.Input(size=5, key=titulos[0])],
-    [sg.Text(titulos[1]), sg.Input(size=20, key=titulos[1])],
-    [sg.Text(titulos[2]), sg.Combo(['Fornecedor 1', 'Fornecedor 2', 'Fornecedor 3'], key=titulos[2])],
-    [sg.Button('Adicionar'), sg.Button('Editar'), sg.Button('Salvar', disabled=True), sg.Button('Excluir'), sg.Exit('Sair'), sg.Button('Consultar')],
-    [sg.Table(dados, titulos, key='tabela')]
-]
+    for col_name in cols:
+        treeview.heading(col_name, text=col_name, anchor='w')
 
-window = sg.Window('Sistema de gerencia de suplementos', layout)
+    for value_tuple in list_values[2:]:
+        treeview.insert('', tk.END, values=value_tuple)
 
-while True: #Para escutar sempre as ações do usuário!
+def insert_data():
+    nome = nome_entry.get()
+    dataNascimento = dataNascimento_entry.get()
+    celular = celular_entry.get()
+    endereco = endereco_entry.get()
+    cidade = cidade_entry.get()
     
-    event, values = window.read()
-    print(values)
+    if nome == '' or nome == 'Nome':
+        print("Nome é obrigatorio")
+    else:
+        #Salvar dados no arquivo excel
+        diretorio = os.path.dirname(os.path.abspath(__file__))
+        db_path = os.path.join(diretorio, 'clientes.xlsx')
+        workbook = openpyxl.load_workbook(db_path)
+        sheet = workbook.active
+        row_values = [nome, dataNascimento, celular, endereco, cidade] #Dados do row
+        sheet.append(row_values)
+        workbook.save(db_path)
 
-    if event == 'tabela':
-        selected_row = str(values['tabela'][0])
-        print(selected_row)
+        #Inserir dados salvos na treeview
+        treeview.insert('', tk.END, values=row_values)
 
-    if event == 'Consultar': #Novo método de exclusão!
-        if values['tabela']==[]:
-            sg.poup('Nenhuma linha foi selecionada')
-        else :
-            if sg.popup_ok_cancel('Essa operação não pode ser desfeita. Confirma?') == 'OK':
-                try:
-                    # INSERT
-                    connection = sqlite3.connect(db_path)
-                    myCursor = connection.cursor()
+        #Limpar e colocar os dados iniciais dos nossos campos
+        nome_entry.delete(0, 'end')
+        nome_entry.insert(0, "Nome")
 
-                    del dados[values['tabela'][0]]  #Remove a linha selecionada
-                    window['tabela'].update(values=dados)
-                    PRODUTO = values=dados
-                    print("Produto :" + PRODUTO)
-                    delete_stmt = "DELETE FROM SUPLEMENTO WHERE PRODUTO ="+PRODUTO
-                    myCursor.execute(delete_stmt)
-                    # myCursor.execute("DELETE FROM SUPLEMENTO WHERE LOTE = ? ", (values[titulos[0]],))
-                    
-                    connection.commit()
-                    connection.close()
+        dataNascimento_entry.delete(0, 'end')
+        dataNascimento_entry.insert(0, "Data de Nascimento")
 
-                except sqlite3.Error as e:
-                    print(e)
+        celular_entry.delete(0, 'end')
+        celular_entry.insert(0, "Celular")
 
-                finally:
-                    print("Registro removido!")
+        endereco_entry.delete(0, 'end')
+        endereco_entry.insert(0, "Celular")
+
+        cidade_entry.delete(0, 'end')
+        cidade_entry.insert(0, "Celular")
+        #Limpar e colocar os dados iniciais dos nossos campos
+#BACKEND
 
 
-    if event == 'Adicionar':
-        dados.append([values[titulos[0]], values[titulos[1]],values[titulos[2]]])
-        window['tabela'].update(values=dados)
-        for i in range(3) : #Limpa as caixas de texto
-            window[titulos[i]].update(value='')
+#FRONTEND
+#iniciando a nossa janela
+root = tk.Tk()
+root.geometry("%dx%d+0+0" % (root.winfo_screenwidth(), root.winfo_screenheight()))
+root.attributes('-fullscreen',True)
 
-        # INSERT
-        connection = sqlite3.connect(db_path)
-        connection.execute("INSERT INTO SUPLEMENTO (LOTE, PRODUTO, FORNECEDOR) VALUES (?,?,?)", ([values[titulos[0]], values[titulos[1]], values[titulos[2]]]))
-        connection.commit()
-        connection.close()
+root.title('Cadastro de Clientes')
 
-    if event == 'Editar' :
-        if values['tabela']==[]:
-            sg.popup('Nenhuma linha selecionada')
-        else:
-            editarLinha=values['tabela'][0]
-            sg.popup('Editar linha selecionada')
-            for i in range(3):
-                window[titulos[i]].update(value=dados[editarLinha][i])
-            window['Salvar'].update(disabled=False)
+#Configuracao do tema
+style = ttk.Style(root)
+root.tk.call("source", "forest-light.tcl")
+root.tk.call("source", "forest-dark.tcl")
+style.theme_use("forest-dark")
 
-    if event == 'Salvar':
-        dados[editarLinha]=[values[titulos[0]], values[titulos[1]], values[titulos[2]]]
-        window['tabela'].update(values=dados)
-        for i in range(3) :
-            window[titulos[i]].update(value='')
-        window['Salvar'].update(disabled=True)
+#Frame principal
+frame = ttk.Frame(root)
+frame.pack()
+#Frame principal
 
-        # INSERT
-        connection = sqlite3.connect(db_path)
-        connection.execute("UPDATE SUPLEMENTO set PRODUTO = ?, FORNECEDOR = ? where LOTE = ?", ([values[titulos[0]], values[titulos[1]], values[titulos[2]]]))
-        connection.commit()
-        connection.close()
+#Frame do Titulo do app
+frame2 = ttk.Frame(frame)
+frame2.place(x=50, y=25, width=300, height=100)
+text_label = ttk.Label(frame2, text="Cadastro de clientes", font=('Arial', 25))
+text_label.pack(expand=True)
+#Frame do Titulo do app
 
-    if event == 'Excluir' :
-        if values['tabela']==[]:
-            sg.poup('Nenhuma linha foi selecionada')
-        else :
-            if sg.popup_ok_cancel('Essa operação não pode ser desfeita. Confirma?') == 'OK':
+#Frame dos Inputs
+widgets_frame = ttk.LabelFrame(frame, text="Insira os dados")
+widgets_frame.grid(row=0, column=0, padx=50, pady=150)
 
-                # INSERT
-                connection = sqlite3.connect(db_path)
-                connection.execute("DELETE FROM SUPLEMENTO WHERE LOTE = ?;", (values[titulos[0]],))
-                connection.commit()
-                connection.close()
+#INPUTS
+nome_entry = ttk.Entry(widgets_frame)
+nome_entry.insert(0, "Nome")
+nome_entry.bind("<FocusIn>", lambda e: nome_entry.delete('0', 'end'))
+nome_entry.grid(row=0, column=0, padx=5, pady=(10,5), ipadx= 100, sticky='ew')
 
-                del dados[values['tabela'][0]]  #Remove a linha selecionada
-                window['tabela'].update(values=dados)
+dataNascimento_entry = ttk.Entry(widgets_frame)
+dataNascimento_entry.insert(0, "Data de Nascimento")
+dataNascimento_entry.bind("<FocusIn>", lambda e: dataNascimento_entry.delete('0', 'end'))
+dataNascimento_entry.grid(row=1, column=0, padx=5, pady=5, sticky='ew')
 
-    if event in (sg.WIN_CLOSED, 'Sair'):
-        break
+celular_entry = ttk.Entry(widgets_frame)
+celular_entry.insert(0, "Celular")
+celular_entry.bind("<FocusIn>", lambda e: celular_entry.delete('0', 'end'))
+celular_entry.grid(row=2, column=0, padx=5, pady=5, sticky='ew')
 
-window.close()
+endereco_entry = ttk.Entry(widgets_frame)
+endereco_entry.insert(0, "Endereço")
+endereco_entry.bind("<FocusIn>", lambda e: endereco_entry.delete('0', 'end'))
+endereco_entry.grid(row=3, column=0, padx=5, pady=5, sticky='ew')
+
+cidade_entry = ttk.Entry(widgets_frame)
+cidade_entry.insert(0, "Cidade")
+cidade_entry.bind("<FocusIn>", lambda e: cidade_entry.delete('0', 'end'))
+cidade_entry.grid(row=4, column=0, padx=5, pady=5, sticky='ew')
+
+InserirDadosBtn = ttk.Button(widgets_frame, text='Inserir dados'.upper(), command=insert_data)
+InserirDadosBtn.grid(row=5, column=0, padx=5, pady=5, sticky='nsew')
+
+sairBtn = ttk.Button(widgets_frame, text='Sair'.upper(), command=root.quit)
+sairBtn.grid(row=6, column=0, padx=5, pady=5, sticky='nsew')
+
+#Frame Treeview para visualizar banco de dados
+treeFrame = ttk.Frame(frame)
+treeFrame.grid(row=0, column=1, padx=50, pady=150)
+treeScroll = ttk.Scrollbar(treeFrame)
+treeScroll.pack(side="right", fill="y")
+
+cols = ("Nome", "Data de Nascimento", "Celular", "Endereço", "Cidade")
+treeview = ttk.Treeview(treeFrame, show="headings", yscrollcommand=treeScroll.set, columns=cols, height=35)
+
+treeview.column("Nome", width=120)
+treeview.column("Data de Nascimento", width=150)
+treeview.column("Celular", width=120)
+treeview.column("Endereço", width=120)
+treeview.column("Cidade", width=120)
+treeview.pack()
+treeScroll.config(command=treeview.yview)
+
+load_data()
+#Frame Treeview para visualizar banco de dados
+
+
+#Rodando a nossa janela
+root.mainloop()
