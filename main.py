@@ -17,7 +17,7 @@ def load_data():
     for col_name in cols:
         treeview.heading(col_name, text=col_name, anchor='w')
 
-    for value_tuple in list_values[2:]:
+    for value_tuple in list_values[1:]:
         treeview.insert('', tk.END, values=value_tuple)
 
 def insert_data():
