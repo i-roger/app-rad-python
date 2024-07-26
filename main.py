@@ -1,11 +1,18 @@
 import tkinter as tk
 from tkinter import ttk
-import customtkinter
 import openpyxl
 import webbrowser, os
 
+#==============================================================================#
+# Trabalho de Extensão : Empreendedorismo no consultório odontológico          #
+# Projeto para faculdade de Ciências da computação         2024.3              #
+# Desenvolvido por : Matheus Roger                                             #                                                     
+#==============================================================================#
 
-#BACKEND
+
+#==============================================================================#
+# BACKEND                                                                      #
+#==============================================================================#
 def load_data():
     diretorio = os.path.dirname(os.path.abspath(__file__))
     db_path = os.path.join(diretorio, 'clientes.xlsx')
@@ -97,24 +104,16 @@ def abrirPlanilha():
     # Fechar janela de aviso
     abrirBtn = ttk.Button(dialogFrame, text='Não'.upper(), command=dialog.destroy)
     abrirBtn.pack(side='right', padx=5)
+#==============================================================================#
+# FIM BACKEND                                                                  #
+#==============================================================================#
 
-
-    # new_window = customtkinter.CTkToplevel(root)
-    # new_window.title("ATENÇÃO!")
-    # new_window.resizeable(False,False)
-
-    # path = "./clientes.xlsx"
-    # webbrowser.open(os.path.realpath(path))
-
-#BACKEND
-
-
-#FRONTEND
-#iniciando a nossa janela
+#==============================================================================#
+# FRONTEND                                                                     #
+#==============================================================================#
 root = tk.Tk()
 root.geometry("%dx%d+0+0" % (root.winfo_screenwidth(), root.winfo_screenheight()))
 root.attributes('-fullscreen',True)
-
 root.title('Cadastro de Clientes')
 
 #Configuracao do tema
@@ -123,12 +122,12 @@ root.tk.call("source", "forest-light.tcl")
 root.tk.call("source", "forest-dark.tcl")
 style.theme_use("forest-dark")
 
-#Frame principal
+#==============================================================================#
+# Declaração dos Elementos                                                     #
+#==============================================================================#
 frame = ttk.Frame(root)
 frame.pack()
-#Frame principal
 
-#Frame do Titulo do app
 frame2 = ttk.Frame(frame)
 frame2.place(x=50, y=25, width=300, height=100)
 text_label = ttk.Label(frame2, text="Cadastro de clientes", font=('Arial', 25))
@@ -136,14 +135,10 @@ text_label.pack(expand=True)
 
 planilhaBtn = ttk.Button(frame2, text='Abrir Planilha'.upper(), command=abrirPlanilha)
 planilhaBtn.pack(expand=True)
-# planilhaBtn.grid(row=7, column=0, padx=5, pady=5, sticky='nsew')
-#Frame do Titulo do app
 
-#Frame dos Inputs
 widgets_frame = ttk.LabelFrame(frame, text="Insira os dados")
 widgets_frame.grid(row=0, column=0, padx=50, pady=150)
 
-#INPUTS
 nome_entry = ttk.Entry(widgets_frame)
 nome_entry.insert(0, "Nome")
 nome_entry.bind("<FocusIn>", lambda e: nome_entry.delete('0', 'end'))
@@ -179,8 +174,12 @@ InserirDadosBtn.grid(row=6, column=0, padx=5, pady=5, sticky='nsew')
 
 sairBtn = ttk.Button(widgets_frame, text='Sair'.upper(), command=root.quit)
 sairBtn.grid(row=7, column=0, padx=5, pady=5, sticky='nsew')
+#==============================================================================#
 
-#Frame Treeview para visualizar banco de dados
+
+#==============================================================================#
+# Frame treeview para visualizar banco de dados                                #
+#==============================================================================#
 treeFrame = ttk.Frame(frame)
 treeFrame.grid(row=0, column=1, padx=50, pady=150)
 treeScroll = ttk.Scrollbar(treeFrame)
@@ -199,8 +198,6 @@ treeview.pack()
 treeScroll.config(command=treeview.yview)
 
 load_data()
-#Frame Treeview para visualizar banco de dados
+#==============================================================================#
 
-
-#Rodando a nossa janela
 root.mainloop()
